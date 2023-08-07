@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using HurricaneVR.Framework.ControllerInput;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class AxleInfo {
@@ -60,103 +61,84 @@ public class VehicleController : MonoBehaviour {
 
     private void Update()
     {
-        var _steerEulerAngles = _steer.eulerAngles;
-        if (_axisForSteer == Axis.X)
-        {
-            var generalAxis = _steerEulerAngles.x;
-            if ((!_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180) || (_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180))
-            {
-                _steerEulerAngles = new Vector3(_maxRotateSteer, _steerEulerAngles.y, _steerEulerAngles.z);
-            }
-            else if((!_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180) || (_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180))
-            {
-                _steerEulerAngles = new Vector3(_maxRotateSteer, _steerEulerAngles.y, _steerEulerAngles.z);
-            }
+        var steerEulerAngles = _steer.eulerAngles;
+        var generalAxis = _steer.localEulerAngles.z;
 
-            generalAxis = _steerEulerAngles.x;
-            _steer.eulerAngles = _steerEulerAngles;
-            _steer.localEulerAngles = new Vector3(_steer.localEulerAngles.x, _beginLocalRotationSteer.y, _beginLocalRotationSteer.z);
-        
-            if (generalAxis is <= 90 and >= 0 || Math.Abs(generalAxis - (-90)) < 0.1f)
-            {
-                horizontal = _inversionRotate ? generalAxis / -_maxRotateSteer : generalAxis / _maxRotateSteer;
-            }
-            else
-            {
-                horizontal = _inversionRotate ? (generalAxis - 360) / -_maxRotateSteer : (generalAxis - 360) / _maxRotateSteer;
-            }
+        if (HVRInputManager.Instance.LeftController.PrimaryButton)
+        {
+            SceneManager.LoadScene(0);
         }
-        else if (_axisForSteer == Axis.Y)
-        {
-            var generalAxis = _steerEulerAngles.y;
-            if ((!_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180) || (_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180))
-            {
-                _steerEulerAngles = new Vector3(_steerEulerAngles.x, _maxRotateSteer, _steerEulerAngles.z);
-            }
-            else if((!_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180) || (_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180))
-            {
-                _steerEulerAngles = new Vector3(_steerEulerAngles.x, _maxRotateSteer, _steerEulerAngles.z);
-            }
-
-            generalAxis = _steerEulerAngles.y;
-            _steer.eulerAngles = _steerEulerAngles;
-            _steer.localEulerAngles = new Vector3(_beginLocalRotationSteer.x, _steer.localEulerAngles.y, _beginLocalRotationSteer.z);
         
-            if (generalAxis is <= 90 and >= 0 || Math.Abs(generalAxis - (-90)) < 0.1f)
-            {
-                horizontal = _inversionRotate ? generalAxis / -_maxRotateSteer : generalAxis / _maxRotateSteer;
-            }
-            else
-            {
-                horizontal = _inversionRotate ? (generalAxis - 360) / -_maxRotateSteer : (generalAxis - 360) / _maxRotateSteer;
-            }
+        // // limitation of steering wheel rotation on the z axis
+        // if ((!_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180) || (_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180))
+        // {
+        //     steerEulerAngles = new Vector3(steerEulerAngles.x, steerEulerAngles.y, _maxRotateSteer);
+        // }
+        // else if((!_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180) || (_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180))
+        // {
+        //     steerEulerAngles = new Vector3(steerEulerAngles.x, steerEulerAngles.y, -_maxRotateSteer);
+        // }
+
+        
+        _steer.eulerAngles = steerEulerAngles;
+        _steer.localEulerAngles = new Vector3(_beginLocalRotationSteer.x, _beginLocalRotationSteer.y, _steer.localEulerAngles.z);
+        
+        
+        // rotate wheels
+        if (_steer.localEulerAngles.z is <= 360 and >= 260)
+        {
+            horizontal = _inversionRotate ? (_steer.localEulerAngles.z - 360) / -_maxRotateSteer : (_steer.localEulerAngles.z - 360) / _maxRotateSteer;
         }
         else
         {
-            var generalAxis = _steerEulerAngles.z;
-            if ((!_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180) || (_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180))
-            {
-                _steerEulerAngles = new Vector3(_steerEulerAngles.x, _steerEulerAngles.y, _maxRotateSteer);
-            }
-            else if((!_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180) || (_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180))
-            {
-                _steerEulerAngles = new Vector3(_steerEulerAngles.x, _steerEulerAngles.y, -_maxRotateSteer);
-            }
-
-            generalAxis = _steerEulerAngles.z;
-            _steer.eulerAngles = _steerEulerAngles;
-            _steer.localEulerAngles = new Vector3(_beginLocalRotationSteer.x, _beginLocalRotationSteer.y, _steer.localEulerAngles.z);
-        
-            if (generalAxis is <= 90 and >= 0 || Math.Abs(generalAxis - (-90)) < 0.1f)
-            {
-                horizontal = _inversionRotate ? generalAxis / -_maxRotateSteer : generalAxis / _maxRotateSteer;
-            }
-            else
-            {
-                horizontal = _inversionRotate ? (generalAxis - 360) / -_maxRotateSteer : (generalAxis - 360) / _maxRotateSteer;
-            }
+            horizontal = _inversionRotate ? _steer.localEulerAngles.z / -_maxRotateSteer : _steer.localEulerAngles.z / _maxRotateSteer;
         }
-        Debug.LogError(_steerEulerAngles);
-       
 
-        if (HVRInputManager.Instance.LeftController.TriggerButtonState.Active)
+        switch (horizontal)
         {
-            vertical = -1;
+            case > 1:
+                horizontal = 1;
+                break;
+            case < -1:
+                horizontal = -1;
+                break;
+        }
+        if (HVRInputManager.Instance.LeftController.TriggerButtonState.Active || Input.GetKey(KeyCode.Space))
+        {
+            foreach (AxleInfo axleInfo in axleInfos) {
+                if (axleInfo.motor) {
+                    axleInfo.leftWheel.brakeTorque = vehicleSettings.maxBrakeTorque;
+                    axleInfo.rightWheel.brakeTorque = vehicleSettings.maxBrakeTorque;
+                }
+            }
         }
         else if(HVRInputManager.Instance.RightController.TriggerButtonState.Active)
         {
             vertical = 1;
+            foreach (AxleInfo axleInfo in axleInfos) {
+                if (axleInfo.motor) {
+                    axleInfo.leftWheel.brakeTorque = 0;
+                    axleInfo.rightWheel.brakeTorque = 0;
+                }
+            }
         }
         else
         {
             vertical = 0;
+            
+            foreach (AxleInfo axleInfo in axleInfos) {
+                if (axleInfo.motor) {
+                    axleInfo.leftWheel.brakeTorque = 0;
+                    axleInfo.rightWheel.brakeTorque = 0;
+                }
+            }
         }
     }
 
     public void FixedUpdate()
     {
         float motor = _maxMotorTorque * vertical;
-        
+
         float steering = _maxSteeringAngle * horizontal;
      
         foreach (AxleInfo axleInfo in axleInfos) {

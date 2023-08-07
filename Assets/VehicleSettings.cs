@@ -7,6 +7,7 @@ public class VehicleSettings : ScriptableObject
 {
     public Axis axisForSteer = Axis.Z;
     public float maxMotorTorque = 400;
+    public float maxBrakeTorque = 15000;
     public float maxSteeringAngle = 30;
     public bool inversionRotate;
     public float maxRotateSteer = 90;

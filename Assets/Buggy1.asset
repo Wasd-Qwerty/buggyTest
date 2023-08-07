@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Buggy1
   m_EditorClassIdentifier: Assembly-CSharp::VehicleSettings
   axisForSteer: 2
-  maxMotorTorque: 400
+  maxMotorTorque: 1600
+  maxBrakeTorque: 150000
   maxSteeringAngle: 30
   inversionRotate: 1
   maxRotateSteer: 90
