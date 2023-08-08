@@ -1,145 +1,119 @@
 using System;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using HurricaneVR.Framework.ControllerInput;
 using UnityEngine.SceneManagement;
 
-[System.Serializable]
+[Serializable]
 public class AxleInfo {
     public WheelCollider leftWheel;
     public WheelCollider rightWheel;
     public bool motor;
     public bool steering;
 }
-public enum Axis
-{
-    X, Y, Z
-}
 
 public class VehicleController : MonoBehaviour {
     public List<AxleInfo> axleInfos; 
-    [SerializeField] private Transform _steer;
+    [SerializeField] private Transform steer;
 
     public VehicleSettings vehicleSettings;
     
-    private Axis _axisForSteer;
     private float _maxMotorTorque, _maxSteeringAngle, _maxRotateSteer;
-    private bool _inversionRotate;
 
-    
     private Vector3 _beginLocalRotationSteer;
-    private float horizontal, vertical;
-    // finds the corresponding visual wheel
-    // correctly applies the transform
-    public void ApplyLocalPositionToVisuals(WheelCollider collider)
+    private float _horizontal, _vertical;
+
+    private void ApplyLocalPositionToVisuals(WheelCollider collider)
     {
         if (collider.transform.childCount == 0) {
             return;
         }
      
-        Transform visualWheel = collider.transform.GetChild(0);
+        var visualWheel = collider.transform.GetChild(0);
      
-        Vector3 position;
-        Quaternion rotation;
-        collider.GetWorldPose(out position, out rotation);
+        collider.GetWorldPose(out var position, out var rotation);
      
         visualWheel.transform.position = position;
         visualWheel.transform.rotation = rotation;
     }
 
-    private void Start()
+    private void Awake()
     {
-        _beginLocalRotationSteer = _steer.localEulerAngles;
-        
-        _axisForSteer = vehicleSettings.axisForSteer;
+        _beginLocalRotationSteer = steer.localEulerAngles;
         _maxMotorTorque = vehicleSettings.maxMotorTorque;
         _maxSteeringAngle = vehicleSettings.maxSteeringAngle;
         _maxRotateSteer = vehicleSettings.maxRotateSteer;
-        _inversionRotate = vehicleSettings.inversionRotate;
     }
 
     private void Update()
     {
-        var steerEulerAngles = _steer.eulerAngles;
-        var generalAxis = _steer.localEulerAngles.z;
+        var steerEulerAngles = steer.eulerAngles;
 
+        
+        // reload scene
         if (HVRInputManager.Instance.LeftController.PrimaryButton)
         {
             SceneManager.LoadScene(0);
         }
-        
-        // // limitation of steering wheel rotation on the z axis
-        // if ((!_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180) || (_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180))
-        // {
-        //     steerEulerAngles = new Vector3(steerEulerAngles.x, steerEulerAngles.y, _maxRotateSteer);
-        // }
-        // else if((!_inversionRotate && generalAxis > _maxRotateSteer && generalAxis < 180) || (_inversionRotate && generalAxis < 360 - _maxRotateSteer && generalAxis > 180))
-        // {
-        //     steerEulerAngles = new Vector3(steerEulerAngles.x, steerEulerAngles.y, -_maxRotateSteer);
-        // }
 
-        
-        _steer.eulerAngles = steerEulerAngles;
-        _steer.localEulerAngles = new Vector3(_beginLocalRotationSteer.x, _beginLocalRotationSteer.y, _steer.localEulerAngles.z);
-        
-        
-        // rotate wheels
-        if (_steer.localEulerAngles.z is <= 360 and >= 260)
-        {
-            horizontal = _inversionRotate ? (_steer.localEulerAngles.z - 360) / -_maxRotateSteer : (_steer.localEulerAngles.z - 360) / _maxRotateSteer;
-        }
-        else
-        {
-            horizontal = _inversionRotate ? _steer.localEulerAngles.z / -_maxRotateSteer : _steer.localEulerAngles.z / _maxRotateSteer;
-        }
 
-        switch (horizontal)
-        {
-            case > 1:
-                horizontal = 1;
-                break;
-            case < -1:
-                horizontal = -1;
-                break;
-        }
+        steer.eulerAngles = steerEulerAngles;
+        steer.localEulerAngles = new Vector3(_beginLocalRotationSteer.x, _beginLocalRotationSteer.y, steer.localEulerAngles.z);
+
+        CalculateHorizontalAxis();
+        
         if (HVRInputManager.Instance.LeftController.TriggerButtonState.Active || Input.GetKey(KeyCode.Space))
         {
-            foreach (AxleInfo axleInfo in axleInfos) {
-                if (axleInfo.motor) {
-                    axleInfo.leftWheel.brakeTorque = vehicleSettings.maxBrakeTorque;
-                    axleInfo.rightWheel.brakeTorque = vehicleSettings.maxBrakeTorque;
-                }
-            }
+            Brake(true);
         }
         else if(HVRInputManager.Instance.RightController.TriggerButtonState.Active)
         {
-            vertical = 1;
-            foreach (AxleInfo axleInfo in axleInfos) {
-                if (axleInfo.motor) {
-                    axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.brakeTorque = 0;
-                }
-            }
+            _vertical = 1;
+            Brake(false);
         }
         else
         {
-            vertical = 0;
-            
-            foreach (AxleInfo axleInfo in axleInfos) {
-                if (axleInfo.motor) {
-                    axleInfo.leftWheel.brakeTorque = 0;
-                    axleInfo.rightWheel.brakeTorque = 0;
-                }
-            }
+            _vertical = 0;
+            Brake(false);
+        }
+    }
+
+    private void Brake(bool isBrake)
+    {
+        var brakeTorque = isBrake ? vehicleSettings.maxBrakeTorque : 0;
+        
+        foreach (var axleInfo in axleInfos)
+        {
+            if (!axleInfo.motor) continue; // comment out this if you want to lock all the wheels
+            axleInfo.leftWheel.brakeTorque = brakeTorque;
+            axleInfo.rightWheel.brakeTorque = brakeTorque;
+        }
+        
+    }
+
+    private void CalculateHorizontalAxis()
+    {
+        _horizontal = Mathf.Clamp01((steer.localEulerAngles.z - 90f) / 180f) * 2f - 1f;
+        
+        // invers
+        _horizontal *= -1;
+        
+        switch (_horizontal)
+        {
+            case > 1:
+                _horizontal = 1;
+                break;
+            case < -1:
+                _horizontal = -1;
+                break;
         }
     }
 
     public void FixedUpdate()
     {
-        float motor = _maxMotorTorque * vertical;
+        float motor = _maxMotorTorque * _vertical;
 
-        float steering = _maxSteeringAngle * horizontal;
+        float steering = _maxSteeringAngle * _horizontal;
      
         foreach (AxleInfo axleInfo in axleInfos) {
             if (axleInfo.steering) {

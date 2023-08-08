@@ -1,21 +1,26 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SteeringWheelController : MonoBehaviour
 {
-    public Transform steeringWheel; // Ссылка на объект руля
-    public Transform handController; // Ссылка на объект контроллера руки
-
-    public float maxRotationAngle = 180.0f; // Максимальный угол вращения руля
-    public float rotationScale = 2.0f, borderOfControllers = 0.25f; // Коэффициент масштабирования поворота
+    public Transform steeringWheel;
+    public Transform handController;
+    public Transform debugSphere;
+    public float rotationSpeed = 1000f;
     public bool debug;
-    
-    private Quaternion initialRotation; // Начальное вращение руля
-    private Vector3 prevControllerPosition, positionDelta; // Предыдущая позиция контроллера
-    private bool isSteeringActive = false; // Флаг активации управления рулём
 
+    public float minAngle = 90, maxAngle = 270;
+
+    private bool isSteeringActive = false;
+    private Vector3 initialControllerPosition;
+    private Quaternion initialSteeringRotation;
+    private float initialSteeringAngle;
+    private Vector3 initialToHandLocal;
+
+    private void Start()
+    {
+        initialSteeringRotation = steeringWheel.localRotation;
+        initialSteeringAngle = initialSteeringRotation.eulerAngles.z;
+    }
 
     private void Update()
     {
@@ -28,65 +33,52 @@ public class SteeringWheelController : MonoBehaviour
 
             debug = false;
         }
-        
-        
-        // if ((steeringWheel.localEulerAngles.z < 360 - maxRotationAngle && steeringWheel.localEulerAngles.z > 180))
-        // {
-        //     steeringWheel.localEulerAngles = new Vector3(steeringWheel.localEulerAngles.x, steeringWheel.localEulerAngles.y, maxRotationAngle);
-        // }
-        // else if((steeringWheel.localEulerAngles.z > maxRotationAngle && steeringWheel.localEulerAngles.z < 180))
-        // {
-        //     steeringWheel.localEulerAngles = new Vector3(steeringWheel.localEulerAngles.x, steeringWheel.localEulerAngles.y, -maxRotationAngle);
-        // }
-        
-        // steeringWheel.localEulerAngles = new Vector3(
-        //     steeringWheel.localEulerAngles.x, 
-        //     steeringWheel.localEulerAngles.y, 
-        //     Mathf.Clamp(steeringWheel.localEulerAngles.z - 360, maxRotationAngle/2f - 360, Mathf.Abs(maxRotationAngle/2f - 360)));
-        var controllerPosition = handController.localPosition;
-        positionDelta = controllerPosition - prevControllerPosition;
-        
+
         if (isSteeringActive)
         {
+            // Вычисляем текущее локальное положение руки относительно руля
+            var toHandLocal = steeringWheel.InverseTransformPoint(handController.position);
 
-            initialRotation = steeringWheel.localRotation;
-            Debug.DrawRay(steeringWheel.position,  steeringWheel.position - controllerPosition, Color.green);
-            // Debug.LogError(handController.position - steeringWheel.position);
-            if (Mathf.Abs((handController.position - steeringWheel.position).x) > borderOfControllers || Mathf.Abs((handController.position - steeringWheel.position).y) > borderOfControllers)
-                return;
+            // Вычисляем углы поворота для текущего положения руки и начального положения руки
+            float angleToHand = Mathf.Atan2(toHandLocal.y, toHandLocal.x) * Mathf.Rad2Deg;
+            float initialAngleToHand = Mathf.Atan2(initialToHandLocal.y, initialToHandLocal.x) * Mathf.Rad2Deg;
 
-            // var a = (Mathf.Abs(whereHand.x) + Mathf.Abs(whereHand.y)) / Mathf.Pow(borderOfControllers, 2);
-            // var b = rotationScale / (rotationScale * (a + 0.00001f));
-            
-            positionDelta = controllerPosition - prevControllerPosition;
-            positionDelta.x *= controllerPosition.y > 0 ? -1 : 1;
-            positionDelta.y *= controllerPosition.x < 0 ? -1 : 1;
-            var rotationAmount = (positionDelta.x + positionDelta.y) * maxRotationAngle * rotationScale;
-            
-            
-            var rotation = initialRotation * Quaternion.Euler(0, 0, rotationAmount);
-            
-            var currentRotation = rotation.eulerAngles.z;
-            // Debug.LogError(currentRotation);
-            if (currentRotation is < 90 and > 0 or > 270 and < 360)
+            // Вычисляем разницу углов поворота
+            var angleDiff = Mathf.DeltaAngle(initialAngleToHand, angleToHand);
+
+            // Вычисляем целевой угол поворота руля
+            var targetAngle = initialSteeringRotation.eulerAngles.z + angleDiff;
+            targetAngle = (targetAngle + 360f) % 360f;
+
+            // Вычисляем целевую ориентацию руля
+            var targetRotation = Quaternion.Euler(initialSteeringRotation.eulerAngles.x, initialSteeringRotation.eulerAngles.y, targetAngle);
+            var currentAngle = Quaternion
+                .RotateTowards(steeringWheel.localRotation, targetRotation, rotationSpeed * Time.deltaTime).eulerAngles.z;
+
+            // Проверяем ограничения угла поворота и применяем поворот
+            if ((currentAngle >= minAngle && currentAngle <= maxAngle))
             {
-                steeringWheel.localRotation = rotation;
+                steeringWheel.localRotation = Quaternion.RotateTowards(steeringWheel.localRotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
-
-            prevControllerPosition = controllerPosition;
         }
     }
 
-    // Активировать управление рулём
     public void ActiveSteer()
     {
         isSteeringActive = true;
-        prevControllerPosition = handController.localPosition;
+        initialControllerPosition = handController.position;
+        debugSphere.position = initialControllerPosition;
+
+        // Сохраняем начальное локальное положение руки относительно руля
+        initialToHandLocal = steeringWheel.InverseTransformPoint(handController.position);
     }
 
-    // Деактивировать управление рулём
     public void DeactiveSteer()
     {
         isSteeringActive = false;
+
+        // Возвращаем руль в исходное положение
+        steeringWheel.localRotation = initialSteeringRotation;
     }
 }
+    
