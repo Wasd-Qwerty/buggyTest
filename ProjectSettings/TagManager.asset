@@ -19,9 +19,9 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
+  - Grabbable
+  - Hand
+  - DynamicPose
   - Player
   - Interactable
   - Car

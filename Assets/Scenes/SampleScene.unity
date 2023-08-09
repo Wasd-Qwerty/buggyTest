@@ -4311,15 +4311,15 @@ MonoBehaviour:
   GrabBehaviour: 0
   PoseType: 1
   TrackingType: 0
-  HoldType: 0
+  HoldType: 2
   GrabControl: 0
   OverrideGrabTrigger: 0
   GrabTrigger: 0
   RequireLineOfSight: 0
   PoseImmediately: 0
-  ParentHandModel: 1
+  ParentHandModel: 0
   BreakDistance: 1
-  BreakDistanceSource: 0
+  BreakDistanceSource: 2
   RemainsKinematic: 1
   Stationary: 1
   ReleasedAngularConversionFactor: 1
@@ -5468,18 +5468,18 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 609283064}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba1eae42b15f10546b5f9c88e83c902e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   steeringWheel: {fileID: 845212488}
   handController: {fileID: 609283065}
-  debugSphere: {fileID: 482437889}
   rotationSpeed: 1000
   debug: 0
   minAngle: 90
   maxAngle: 270
+  smoothFactor: 0.2
 --- !u!1 &609815074
 GameObject:
   m_ObjectHideFlags: 0
@@ -7211,7 +7211,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 755418712}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -12.5, z: 100}
+  m_LocalPosition: {x: 0, y: -12.5, z: 453}
   m_LocalScale: {x: 100, y: 0.5, z: 100}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -8644,6 +8644,7 @@ GameObject:
   - component: {fileID: 490904193}
   - component: {fileID: 490904195}
   - component: {fileID: 845641513}
+  - component: {fileID: 845641515}
   m_Layer: 14
   m_Name: Steer
   m_TagString: Untagged
@@ -8658,18 +8659,18 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 845641512}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba1eae42b15f10546b5f9c88e83c902e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   steeringWheel: {fileID: 845212488}
-  handController: {fileID: 1738297170}
-  debugSphere: {fileID: 482437889}
+  handController: {fileID: 0}
   rotationSpeed: 1000
   debug: 0
   minAngle: 90
   maxAngle: 270
+  smoothFactor: 0.2
 --- !u!1 &845641514
 GameObject:
   m_ObjectHideFlags: 0
@@ -8686,6 +8687,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &845641515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845641512}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06e690ef9ce40204ebda1b1dd62e79b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hands:
+  - HandSide: 0
+    HandPhysics: {fileID: 245154015}
+    HandCotroller: {fileID: 1515367353}
+    IsSynchronize: 0
+  - HandSide: 1
+    HandPhysics: {fileID: 321241630}
+    HandCotroller: {fileID: 1738297170}
+    IsSynchronize: 0
 --- !u!1 &845641518
 GameObject:
   m_ObjectHideFlags: 0
@@ -19169,6 +19191,41 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 13
       objectReference: {fileID: 0}
+    - target: {fileID: 964613375009226519, guid: c3a6df4a12b151443895f6b5036bcd93,
+        type: 3}
+      propertyPath: HandGrabs
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 964613375009226519, guid: c3a6df4a12b151443895f6b5036bcd93,
+        type: 3}
+      propertyPath: CloneHandModel
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 964613375009226519, guid: c3a6df4a12b151443895f6b5036bcd93,
+        type: 3}
+      propertyPath: InverseKinematics
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 964613375009226519, guid: c3a6df4a12b151443895f6b5036bcd93,
+        type: 3}
+      propertyPath: AllowMultiplayerSwap
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 964613375009226519, guid: c3a6df4a12b151443895f6b5036bcd93,
+        type: 3}
+      propertyPath: IgnoreParentingAngle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 964613375009226519, guid: c3a6df4a12b151443895f6b5036bcd93,
+        type: 3}
+      propertyPath: DynamicGrabPalmAdjust
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 964613375009226519, guid: c3a6df4a12b151443895f6b5036bcd93,
+        type: 3}
+      propertyPath: IgnoreParentingDistance
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 970189120584786355, guid: c3a6df4a12b151443895f6b5036bcd93,
         type: 3}
       propertyPath: m_Layer
@@ -20573,16 +20630,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 13
-      objectReference: {fileID: 0}
-    - target: {fileID: 7068624862226539904, guid: c3a6df4a12b151443895f6b5036bcd93,
-        type: 3}
-      propertyPath: MaxDistanceReached.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7068624862226539904, guid: c3a6df4a12b151443895f6b5036bcd93,
-        type: 3}
-      propertyPath: MaxDistanceReached.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: HurricaneVR.Framework.Core.Grabbers.HVRHandGrabber, HurricaneVR.Framework
       objectReference: {fileID: 0}
     - target: {fileID: 7068624862226539909, guid: c3a6df4a12b151443895f6b5036bcd93,
         type: 3}
@@ -24760,28 +24807,6 @@ CapsuleCollider:
   m_Height: 0.11
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &1896346192 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3644642798972785324, guid: c3a6df4a12b151443895f6b5036bcd93,
-    type: 3}
-  m_PrefabInstance: {fileID: 1647531583}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1896346200
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1896346192}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06e690ef9ce40204ebda1b1dd62e79b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leftHandTransform: {fileID: 245154015}
-  leftControllerTransform: {fileID: 1515367353}
-  rightHandTransform: {fileID: 321241630}
-  rightControllerTransform: {fileID: 1738297170}
 --- !u!1 &1905988802
 GameObject:
   m_ObjectHideFlags: 0
