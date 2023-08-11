@@ -2,7 +2,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using HurricaneVR.Framework.ControllerInput;
 using UnityEngine.UI;
 
 public enum ControlMode { simple = 1, touch = 2, controller = 3 }

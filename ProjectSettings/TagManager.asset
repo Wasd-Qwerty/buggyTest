@@ -8,11 +8,12 @@ TagManager:
   - Stone
   - Street
   - Grass
+  - SamplesInfoPanel
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - 

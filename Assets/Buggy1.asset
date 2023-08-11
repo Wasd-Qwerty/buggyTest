@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d448a4970bef1c4ebc7f309dc8d76a6, type: 3}
   m_Name: Buggy1
   m_EditorClassIdentifier: Assembly-CSharp::VehicleSettings
-  maxMotorTorque: 5000
-  maxBrakeTorque: 550000
+  maxMotorTorque: 3500
+  maxBrakeTorque: 5500
   maxSteeringAngle: 30
   inversionRotate: 1
   maxRotateSteer: 90
